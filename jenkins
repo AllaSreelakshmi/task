@@ -1,0 +1,42 @@
+pipeline {
+    agent any
+    stages {
+        
+        stage('clonoing to local repo') {
+            steps {
+                script {
+                    git branch: 'main',
+                    url: 'https://github.com/AllaSreelakshmi/task.git'
+                }
+            }
+        }
+        
+        stage('Building image') {
+            steps {
+                script {
+                    sh 'chmod +x build.sh'
+                    sh './build.sh'
+                    
+                }
+            }
+        }
+        
+        stage('pushing to dockerhub repo:devops-task') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'devops-jenkins', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin docker.io"
+                        sh 'docker tag task $DOCKER_USERNAME/devops-task'
+                        sh 'docker push allasreelakshmi/devops-task'
+                        
+                }
+                  
+            }
+                
+        }
+    
+    }
+    
+}
+    
+    
+    
